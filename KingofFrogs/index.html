@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <title>King of The Frogs</title>
+    <link href="stylesheets/screen.css" media="all" rel="stylesheet" type="text/css"/>
+    <script language="javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript"></script><script language="javascript" src="javascripts/jquery.hotkeys.js" type="text/javascript"></script><script language="javascript" src="javascripts/key_status.js" type="text/javascript"></script><script language="javascript" src="javascripts/util.js" type="text/javascript"></script><script language="javascript" src="javascripts/sprite.js" type="text/javascript"></script><script language="javascript" src="javascripts/sound.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <script type='text/javascript'>
+      //<![CDATA[
+        var CANVAS_WIDTH = 1300;
+        var CANVAS_HEIGHT = 650;
+        var FPS = 30;
+         
+        var canvasElement = $("<canvas width='" + CANVAS_WIDTH + 
+          "' height='" + CANVAS_HEIGHT + "'></canvas");
+        var canvas = canvasElement.get(0).getContext("2d");
+        canvasElement.appendTo('body');
+        
+        setInterval(function() {
+          update();
+          draw();
+        }, 1000/FPS);
+
+
+        var player = {
+          x: CANVAS_WIDTH/2-120,
+          y: CANVAS_HEIGHT-100,
+          width: 120,
+          height: 105,
+          draw: function() {
+            canvas.fillRect(this.x, this.y, this.width, this.height);
+          }
+        };
+        
+        flies = [];
+        
+        function Fly(I) {
+          I = I || {};
+        
+          I.active = true;
+          I.age = Math.floor(Math.random() * 128);
+                  
+          I.x = -50;
+          I.y = CANVAS_HEIGHT / 4 + Math.random() * CANVAS_HEIGHT / 2;
+          I.xVelocity = 6
+          I.yVelocity = 0;
+        
+          I.width = 30;
+          I.height = 43;
+        
+          I.inBounds = function() {
+            return I.x >= -50 && I.x <= CANVAS_WIDTH &&
+              I.y >= 0 && I.y <= CANVAS_HEIGHT;
+          };
+        
+          I.sprite = Sprite("fly");
+        
+          I.draw = function() {
+            this.sprite.draw(canvas, this.x, this.y);
+          };
+        
+          I.update = function() {
+            I.x += I.xVelocity;
+            I.y += I.yVelocity;
+        
+            I.yVelocity = 3 * Math.sin(I.age * Math.PI / 64);
+        
+            I.age++;
+        
+            I.active = I.active && I.inBounds();
+          };
+        
+          I.caught = function() {
+            Sound.play("ribbit");
+        
+            this.active = false;
+          };
+        
+          return I;
+        };
+
+//TONGUE
+        var tongueUp = {
+            draw: function() {
+
+              // player.sprite = Sprite("frog");
+              // player.sprite = Sprite("mouth");
+
+              //   player.draw = function() {
+              //     this.sprite.draw(canvas, this.x, this.y);
+              //   };
+
+              canvas.beginPath(); 
+              canvas.lineTo(player.x + 52,player.y+50);       
+              canvas.arc(player.x + 59,player.y-140,2,2 * Math.PI,2 * Math.PI);
+              canvas.lineTo(player.x +66,player.y+50);
+              canvas.fillStyle="rgb(153,0,0)";
+              canvas.fill(); 
+
+              console.log("UP!!!");
+
+          }
+
+        };
+
+
+    window.addEventListener('keydown', function(event) {
+        switch (event.keyCode) {
+          case 37: // Left
+
+          break;
+
+          case 38: // Up
+            tongueUp.draw();
+            console.log("UP as well!!!");
+
+          break;
+
+          case 39: // Right
+
+          break;
+
+          case 40: // Down
+
+          break;
+        }
+    });
+
+
+
+
+
+        function update() {
+        
+          player.x = player.x.clamp(0, CANVAS_WIDTH - player.width);
+          
+          
+          flies.forEach(function(fly) {
+            fly.update();
+          });
+        
+          flies = flies.filter(function(fly) {
+            return fly.active;
+          });
+        
+          handleCollisions();
+        
+          if(Math.random() < 0.1) {
+            flies.push(Fly());
+          }
+        }
+
+        
+        function draw() { 
+
+          canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          player.draw();
+          Sound.play("swamp");
+        
+          flies.forEach(function(fly) {
+            fly.draw();
+          });
+        }
+        
+        function collides(a, b) {
+          return a.x<= b.x + b.width &&
+            a.x + a.width >= b.x &&
+            a.y < b.y + b.height &&
+            a.y + a.height > b.y;
+
+        }
+
+        function handleCollisions() {
+        
+          flies.forEach(function(fly) {
+            if(collides(fly, player)) {
+              fly.caught();
+              player.y -= 20;
+            }
+          });
+
+        }
+        
+        
+        player.sprite = Sprite("frog");
+        
+        player.draw = function() {
+          this.sprite.draw(canvas, this.x, this.y);
+        };
+    </script>
+  </body>
+</html>
