@@ -9,7 +9,7 @@
     <script type='text/javascript'>
       //<![CDATA[
         var CANVAS_WIDTH = 1300;
-        var CANVAS_HEIGHT = 650;
+        var CANVAS_HEIGHT = 740;
         var FPS = 30;
          
         var canvasElement = $("<canvas width='" + CANVAS_WIDTH + 
@@ -50,7 +50,7 @@
           I.height = 43;
         
           I.inBounds = function() {
-            return I.x >= -50 && I.x <= CANVAS_WIDTH &&
+            return I.x >= -50 && I.x <= CANVAS_WIDTH -25 &&
               I.y >= 0 && I.y <= CANVAS_HEIGHT;
           };
         
@@ -79,19 +79,17 @@
         
           return I;
         };
-
-//TONGUE
+  //TONGUE
+     
+        var tup = false;
+        var tdown = false;
+  
         var tongueUp = {
             draw: function() {
 
-              // player.sprite = Sprite("frog");
-              // player.sprite = Sprite("mouth");
-
-              //   player.draw = function() {
-              //     this.sprite.draw(canvas, this.x, this.y);
-              //   };
-
-              canvas.beginPath(); 
+              player.sprite = Sprite("frog_mouth");
+          
+              canvas.beginPath();
               canvas.lineTo(player.x + 52,player.y+50);       
               canvas.arc(player.x + 59,player.y-140,2,2 * Math.PI,2 * Math.PI);
               canvas.lineTo(player.x +66,player.y+50);
@@ -101,38 +99,61 @@
               console.log("UP!!!");
 
           }
-
         };
 
+        var tongueDown = {
+            draw: function() {
+
+              player.sprite = Sprite("frog_mouth");
+          
+              canvas.beginPath();
+              canvas.lineTo(player.x + 52, player.y + 50);       
+              canvas.arc(player.x + 59, player.y+240, 2 ,2 * Math.PI, 2 * Math.PI);
+              canvas.lineTo(player.x +66,player.y+50);
+              canvas.fillStyle="rgb(153,0,0)";
+              canvas.fill(); 
+
+              console.log("UP!!!");
+
+          }
+        };
 
     window.addEventListener('keydown', function(event) {
         switch (event.keyCode) {
-          case 37: // Left
-
-          break;
 
           case 38: // Up
-            tongueUp.draw();
-            console.log("UP as well!!!");
-
-          break;
-
-          case 39: // Right
-
+              tup = true;
           break;
 
           case 40: // Down
-
+              tdown = true;
           break;
         }
     });
 
+    window.addEventListener('keyup', function(event) {
+        switch (event.keyCode) {
 
+          case 38: // Up
+              tup = false;
+              player.sprite = Sprite("frog");
+          break;
 
+          case 40: // Down
+              tdown = false;
+              player.sprite = Sprite("frog");
+          break;
+        }
+    });
+
+// Bubble
+
+        var bubble = false;
 
 
         function update() {
-        
+         
+                  
           player.x = player.x.clamp(0, CANVAS_WIDTH - player.width);
           
           
@@ -150,12 +171,29 @@
             flies.push(Fly());
           }
         }
-
         
         function draw() { 
-
+      
           canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+ 
           player.draw();
+
+          //tongue
+
+           if (tup) {
+            tongueUp.draw();
+          }else if (tdown) {
+            tongueDown.draw();
+          }
+
+          //bubble
+
+          if (player.y <= 30){
+              bubble = true;
+              player.sprite = Sprite("frog_bubble");
+          }
+
+
           Sound.play("swamp");
         
           flies.forEach(function(fly) {
